@@ -1,8 +1,11 @@
 <template>
   <div id="app">
-    <AddProd @create="addProductCard"/>
-    <MySelect />
-    <CatalogProd @edit="editProduct" @remove="removeProduct" :products="products" />
+    <input placeholder="Поиск..." class="search_input" v-model="searchQuery" type="text">
+    <div style="display:flex;">
+      <AddProd @create="addProductCard" @addEdit="editProductCard" :editProd="editProd"/>
+      <MySelect />
+      <CatalogProd @remove="removeProduct" @edit="get_ed_pr" :products="searching_for_name" />
+    </div>
   </div>
 </template>
 
@@ -26,24 +29,57 @@ export default {
         {id: 4, title: "Наименование товара", body: "Довольно-таки интересное описание товара в несколько строк. Довольно-таки интересное описание товара в несколько строк", imageUrl: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80", price: "10000 руб."},
         {id: 5, title: "Наименование товара", body: "Довольно-таки интересное описание товара в несколько строк. Довольно-таки интересное описание товара в несколько строк", imageUrl: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80", price: "10000 руб."},
         {id: 6, title: "Наименование товара", body: "Довольно-таки интересное описание товара в несколько строк. Довольно-таки интересное описание товара в несколько строк", imageUrl: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80", price: "10000 руб."},
+        {id: 7, title: "Наименование товара", body: "Довольно-таки интересное описание товара в несколько строк. Довольно-таки интересное описание товара в несколько строк", imageUrl: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80", price: "10000 руб."},
+        {id: 8, title: "Наименование товара", body: "Довольно-таки интересное описание товара в несколько строк. Довольно-таки интересное описание товара в несколько строк", imageUrl: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80", price: "10000 руб."},
+        {id: 9, title: "Наименование товара", body: "Довольно-таки интересное описание товара в несколько строк. Довольно-таки интересное описание товара в несколько строк", imageUrl: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80", price: "10000 руб."},
+        {id: 10, title: "Наименование товара", body: "Довольно-таки интересное описание товара в несколько строк. Довольно-таки интересное описание товара в несколько строк", imageUrl: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80", price: "10000 руб."},
+        {id: 11, title: "Наименование товара", body: "Довольно-таки интересное описание товара в несколько строк. Довольно-таки интересное описание товара в несколько строк", imageUrl: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80", price: "10000 руб."},
+        {id: 12, title: "Наименование товара", body: "Довольно-таки интересное описание товара в несколько строк. Довольно-таки интересное описание товара в несколько строк", imageUrl: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80", price: "10000 руб."},
       ],
       title: '',
       body: '',
       imageUrl: '',
       price: '',
+      searchQuery: '',
+      editProd: null,
     }
   },
   methods: {
     addProductCard(product) {
       this.products.push(product)
+      this.saveProds()
     },
     removeProduct(product) {
       this.products = this.products.filter(p => p.id !== product.id)
+      this.saveProds()
     },
-    editProduct(product) {
-
+    get_ed_pr(product) {
+      this.editProd = product
+    },
+    editProductCard(product) {
+      this.products = this.products.filter(p => p.id !== product.id)
+      this.products.push(product)
+      this.saveProds()
+    },
+    saveProds() {
+      const parsed = JSON.stringify(this.products);
+      localStorage.setItem('products', parsed);
     }
   },
+  mounted() {
+    if (localStorage.getItem('products')) {
+      try {
+        this.products = JSON.parse(localStorage.getItem('products'));
+      } catch(e) {
+        localStorage.removeItem('products');
+      }
+    }
+  },
+  computed: {
+    searching_for_name() {
+      return this.products.filter(prod => prod.title.toLowerCase().includes(this.searchQuery.toLowerCase()))
+    }
+  }
 }
 </script>
 
@@ -52,13 +88,15 @@ export default {
   margin: 0;
   padding: 0;
 }
-
-input {
-  width: 284px;
+.search_input {
+  border: 2px solid black;
+  width: 700px;
+  left: 500px;
+  top: 50px;
+  position: absolute;
+  padding-left: 20px;
   height: 36px;
-  background: #FFFEFB;
-  border: none;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
 }
 
 p {
@@ -76,10 +114,7 @@ img {
   width: 4px;
   height: 4px;
 }
-::placeholder {
-  position: relative;
-  left: 20px;
-}
+
 h1 {
   position: relative;
   left: 20px;

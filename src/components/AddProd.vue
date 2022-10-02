@@ -1,51 +1,88 @@
 <template>
   <div class="PCard">
     <h1>Добавление товара</h1>
-    <div class="PCard" style="margin-top: 30px">
+    <form class="PCard" style="margin-top: 30px" @submit.prevent>
       <p>Наименование товара <img src="@/Rectangle32.png" alt=""></p>
-      <input type="text" v-model="product.title" placeholder=" Введите наименование товара">
+      <input :class="$v.product.title.$error ? 'is-invalid' : ''" type="text" v-model="product.title"  placeholder=" Введите наименование товара">
+      <p style="color: red" v-if="$v.product.title.$dirty && !$v.product.title.required">Поле является обязательным</p>
       <p>Описание товара</p>
       <input type="text" v-model="product.body" placeholder=" Введите описание товара">
       <p>Ссылка на изображение товара <img src="@/Rectangle32.png" alt=""></p>
-      <input type="text" v-model="product.imageUrl" placeholder=" Введите ссылку">
+      <input :class="$v.product.imageUrl.$error ? 'is-invalid' : ''" type="text" v-model="product.imageUrl" placeholder=" Введите ссылку">
+      <p style="color: red" v-if="$v.product.imageUrl.$dirty && !$v.product.imageUrl.required">Поле является обязательным</p>
+      <p style="color: red" v-else-if="$v.product.imageUrl.$dirty && !$v.product.imageUrl.url">Неверно указан адрес изображения</p>
       <p>Цена товара <img src="@/Rectangle32.png" alt=""></p>
-      <input type="text" v-model="product.price" placeholder=" Введите цену">
-      <button @click="addProductCard" class="btn">Добавить товар</button></div>
+      <input :class="$v.product.price.$error ? 'is-invalid' : ''" type="text" v-model="product.price" placeholder=" Введите цену">
+      <p style="color: red" v-if="$v.product.price.$dirty && !$v.product.price.required">Поле является обязательным</p>
+      <button v-if="!redacting" @click="checkForm" class="btn">Добавить товар</button>
+      <button v-if="redacting" @click="checkForm" class="btn">Изменить товар</button>
+      <button @click="fill_lines" class="btn">Обновить поля</button>
+    </form>
   </div>
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
+import { validationMixin } from 'vuelidate'
+import { required, url } from 'vuelidate/lib/validators'
 export default {
+  mixins: [validationMixin],
   name: "AddProd",
-  components: {
-  },
+  components: {  },
   data() {
     return {
       product: {
+        id: '',
         title: '',
         body: '',
         imageUrl: '',
         price: '',
       },
+      redacting: false,
     }
   },
-  validation: {
+  props: {
+    editProd: {
+      type: Object,
+    }
+  },
+  validations: {
     product: {
-      title: {required},
-      price: {required},
-      imageUrl: {required},
+      title: { required },
+      price: { required },
+      imageUrl: { required, url },
+      },
     },
-  },
-  computed: {
-    nameErrors() {
-      const errors = [];
-      if (!this.$v.product.name.required) errors.push('Поле является обязательным')
-    },
-  },
   methods: {
-    addProductCard() {
+    checkForm() {
+      this.$v.product.$touch()
+      if (!this.$v.product.$error) {
+        if (this.redacting) {
+          return this.editProductCard()
+        }else {
+          return this.addProductCard()
+        }
+      }
+    },
+    fill_lines() {
+      this.product.id = this.editProd.id
+      this.product.title = this.editProd.title
+      this.product.body = this.editProd.body
+      this.product.imageUrl = this.editProd.imageUrl
+      this.product.price = this.editProd.price
+      this.redacting = true
+    },
+    editProductCard() {
       console.log(this.product)
+      this.$emit('addEdit', this.product)
+      this.redacting = false
+      this.product = {
+        title: '',
+        body: '',
+        imageUrl: '',
+        price: '',
+      }
+    },
+    addProductCard() {
       this.product.id = Date.now();
       this.$emit('create', this.product)
       this.product = {
@@ -54,10 +91,11 @@ export default {
         imageUrl: '',
         price: '',
       }
-    }
+    },
   }
-
 }
+
+
 </script>
 
 <style scoped>
@@ -68,6 +106,13 @@ input {
   border: none;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   padding-left: 20px;
+}
+.is-r {
+  background: #7BAE73;
+}
+.is-invalid {
+  border: 1px solid red;
+  border-radius: 10px;
 }
 .btn {
   width: 284px;
